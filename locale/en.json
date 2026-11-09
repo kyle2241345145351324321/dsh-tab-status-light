@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Tab Status Light",
+    "description": "Puts the AI session state on the browser tab icon: gray pulsing while working, green when done, yellow while it waits for your answer, red when the turn is interrupted."
+  }
+}

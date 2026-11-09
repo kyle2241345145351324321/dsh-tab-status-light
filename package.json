@@ -1,0 +1,56 @@
+{
+  "name": "dsh-tab-status-light",
+  "version": "1.0.0",
+  "description": "Shows the AI session state on the browser tab icon: gray pulsing while working, green when done, yellow while it waits for an answer, red when interrupted.",
+  "license": "MIT",
+  "author": "Kyle Fu",
+  "keywords": [
+    "deepseek",
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "favicon",
+    "tab-icon",
+    "status"
+  ],
+  "homepage": "https://github.com/kyle2241345145351324321/dsh-tab-status-light#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kyle2241345145351324321/dsh-tab-status-light.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kyle2241345145351324321/dsh-tab-status-light/issues"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "preview.png",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-session",
+        "@deepseek-ai/dsh-api-session-controller"
+      ]
+    }
+  }
+}
