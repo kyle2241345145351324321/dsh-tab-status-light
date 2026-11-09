@@ -24,7 +24,7 @@
  * outside a component; their original `href` values are restored on teardown.
  */
 window.__ModuleLoader__.load({
-	id: "@local/tab-status-light",
+	id: "dsh-tab-status-light",
 	factory: () => {
 		/** State -> badge color. Icon artwork is the one place literal colors are correct: an SVG favicon document cannot read page theme tokens. */
 		const BADGE_COLOR = {
