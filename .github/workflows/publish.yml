@@ -11,12 +11,18 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm
+        # Skipped (green run, no failure) until an NPM_TOKEN repo secret exists.
+        if: env.NODE_AUTH_TOKEN != ''
+        run: npm publish --provenance --access public
+      - name: Notice when the token is missing
+        if: env.NODE_AUTH_TOKEN == ''
+        run: echo "::notice::NPM_TOKEN secret is not set — skipping npm publish."
