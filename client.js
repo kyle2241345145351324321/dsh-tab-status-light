@@ -208,6 +208,8 @@ window.__ModuleLoader__.load({
 			let binding;
 			let stopEvents;
 			let turnEndKind;
+			/** Sentinel that forces the next {@link apply} to repaint even when nothing moved. */
+			const STALE = "\u0000stale";
 			let appliedState;
 			let appliedActivity = -1;
 			/** Bumped whenever something actually happens (new turn end, session switch), so a faded badge can come back. */
@@ -373,15 +375,32 @@ window.__ModuleLoader__.load({
 				apply();
 			}
 
+			/**
+			 * A frozen, discarded or restored tab may have lost the blink tick or kept a
+			 * stale frame: re-derive everything and repaint even when the computed state
+			 * did not move.
+			 */
+			function wake() {
+				if (document.visibilityState === "hidden") return;
+				appliedState = STALE;
+				sync();
+			}
+
 			return {
 				/** Install the subscriptions; call from the owning effect. */
 				start() {
 					const stopList = ctx.sessions.list.subscribe(sync);
 					const stopStatus = ctx.uiSession.sessionStatus.subscribe(sync);
+					document.addEventListener("resume", wake);
+					document.addEventListener("pageshow", wake);
+					document.addEventListener("visibilitychange", wake);
 					sync();
 					return () => {
 						stopList();
 						stopStatus();
+						document.removeEventListener("resume", wake);
+						document.removeEventListener("pageshow", wake);
+						document.removeEventListener("visibilitychange", wake);
 						if (stopEvents !== undefined) stopEvents();
 						stopTimers();
 						stopEvents = undefined;

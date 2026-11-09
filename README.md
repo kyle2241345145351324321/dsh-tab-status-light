@@ -73,7 +73,13 @@ plugin_manager({ action: "install_bundle", target: "/path/to/dsh-tab-status-ligh
 
 - 圖示由「主視窗」那個 session 決定；其他背景 session 的狀態不會顯示。
 - 切換到一個「早就跑完」的 session 不會亮綠燈（只亮真的看到跑完的那一輪）。
-- 分頁在背景時仍會閃爍；極端省電模式下（例如 Chrome Memory Saver 把分頁凍結）可能被暫停。
+- 分頁在背景時仍會閃爍；被瀏覽器**凍結**（Chrome Memory Saver / 省電模式）時則一定會停，
+  任何網頁都沒有繞過凍結的 API。想讓它一直閃，把這個網址加進
+  `chrome://settings/performance` →「永不讓這些網站進入休眠 / Always keep these sites active」。
+- `navigator.wakeLock` 幫不上忙：它只防止螢幕休眠，且分頁一隱藏就會被釋放，
+  不能阻止分頁被凍結。唯一能「不被凍結」的偏方是讓分頁持續播放靜音音訊（需要一次點擊、
+  會出現音訊指示、也比較耗電），不值得。
+- 分頁解凍 / 切回前景時，外掛會立刻重新同步並重畫，所以回到分頁看到的永遠是正確狀態。
 - 用純 SVG data URL 換 href，不支援 SVG favicon 的瀏覽器（很舊的）會看不到變化。
 
 ## 開發
