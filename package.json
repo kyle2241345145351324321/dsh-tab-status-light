@@ -35,6 +35,7 @@
     "locale/*.json",
     "icon.svg",
     "preview.png",
+    "LICENSE",
     "README.md"
   ],
   "publishConfig": {
