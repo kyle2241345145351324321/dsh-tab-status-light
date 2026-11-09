@@ -26,7 +26,9 @@ The shipped whale is left untouched when no session is selected, when the sessio
 not finished a turn yet, or when you merely **switch to a session that finished long ago**
 — green/red are news about something that just happened, not a replay of history.
 `SETTLE_MS` (green, 10 s) and `SETTLE_MS_RED` (red, 20 s) control how long a settled
-badge stays; any new finished turn lights it again.
+badge stays; any new finished turn lights it again. An interruption keeps the tab red for
+its full 20 s even if the next turn finishes inside that window, so a cancel is never
+silently overwritten by a completion.
 
 ### Install
 
@@ -141,8 +143,9 @@ AI 在做事時分頁圖示會**灰色一閃一閃**；這一輪完成變**綠**
 
 沒選 session、該 session 還沒跑完任何一輪、或只是**切到一個早就結束的 session** 時，
 不會動原本的鯨魚圖示 —— 綠／紅是「剛剛發生的事」的通知，不會把歷史重播一次。
-綠燈停留由 `SETTLE_MS`（10 秒）控制、紅燈由 `SETTLE_MS_RED`（20 秒）控制，
-任何新的一輪結束都會讓燈重新亮起。
+綠燈停留由 `SETTLE_MS`（10 秒）控制、紅燈由 `SETTLE_MS_RED`（20 秒）控制。
+**中斷後紅燈會鎖住完整的 20 秒**：即使這段時間內有新的回合完成，也不會被蓋成綠燈，
+避免「明明按了停止卻變綠」。任何新的一輪結束都會讓燈重新亮起。
 
 ### 安裝
 

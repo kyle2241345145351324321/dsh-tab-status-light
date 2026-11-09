@@ -225,6 +225,16 @@ window.__ModuleLoader__.load({
 			let activity = 0;
 			let stopBlink;
 			let stopSettle;
+			/** Sequence of the newest turn/end already applied, used to detect a *new* interruption. */
+			let turnEndSeq = -1;
+			/** Sequence of the interruption that armed {@link redUntil}. */
+			let lastRedSeq = -1;
+			/**
+			 * A turn that was interrupted keeps the red badge for `SETTLE_MS_RED`, even
+			 * if a newer turn finishes inside that window: an interruption should not be
+			 * silently overwritten by the next completion.
+			 */
+			let redUntil = 0;
 			/**
 			 * Whether a turn has actually been seen running since this session was bound.
 			 * A finished session that is merely opened must stay quiet: green/red are news
@@ -245,17 +255,33 @@ window.__ModuleLoader__.load({
 			}
 
 			/**
-			 * Newest `turn/end` reason in the session event window.
+			 * Newest `turn/end` in the session event window.
 			 * @param source - the Session's event source.
-			 * @returns the reason kind, or undefined before any turn closed.
+			 * @returns its reason kind and sequence, or undefined before any turn closed.
 			 */
-			function readTurnEndKind(source) {
+			function readTurnEnd(source) {
 				const entries = source.getSnapshot().entries;
 				for (let index = entries.length - 1; index >= 0; index -= 1) {
 					const entry = entries[index];
-					if (entry.type === "event" && entry.event.type === "turn/end") return entry.event.data.reason.kind;
+					if (entry.type === "event" && entry.event.type === "turn/end") {
+						return { kind: entry.event.data.reason.kind, seq: entry.event.seq };
+					}
 				}
 				return undefined;
+			}
+
+			/**
+			 * Record a turn ending. A newly seen interruption arms the red lock.
+			 * @param ending - the newest `turn/end`, or undefined.
+			 */
+			function noteTurnEnd(ending) {
+				turnEndKind = ending === undefined ? undefined : ending.kind;
+				if (ending === undefined) return;
+				turnEndSeq = ending.seq;
+				if (RED_TURN_END_KINDS.has(ending.kind) && ending.seq !== lastRedSeq) {
+					lastRedSeq = ending.seq;
+					redUntil = Date.now() + SETTLE_MS_RED;
+				}
 			}
 
 			/**
@@ -281,7 +307,9 @@ window.__ModuleLoader__.load({
 				}
 				// Only a turn this plugin watched run may leave a settled badge behind.
 				if (turnEndKind === undefined || !sawRunning) return undefined;
-				return RED_TURN_END_KINDS.has(turnEndKind) ? "interrupted" : "done";
+				if (RED_TURN_END_KINDS.has(turnEndKind)) return "interrupted";
+				// An interruption inside its lock window outranks a newer completion.
+				return Date.now() < redUntil ? "interrupted" : "done";
 			}
 
 			/**
@@ -334,7 +362,7 @@ window.__ModuleLoader__.load({
 						for (let index = change.entries.length - 1; index >= 0; index -= 1) {
 							const entry = change.entries[index];
 							if (entry.type === "event" && entry.event.type === "turn/end") {
-								turnEndKind = entry.event.data.reason.kind;
+								noteTurnEnd({ kind: entry.event.data.reason.kind, seq: entry.event.seq });
 								activity += 1;
 								apply();
 								return;
@@ -343,7 +371,7 @@ window.__ModuleLoader__.load({
 						return;
 					}
 					if (change.kind === "replace") {
-						turnEndKind = readTurnEndKind(source);
+						noteTurnEnd(readTurnEnd(source));
 						apply();
 					}
 				});
@@ -365,6 +393,9 @@ window.__ModuleLoader__.load({
 					if (switched) {
 						activity += 1;
 						turnEndKind = undefined;
+						turnEndSeq = -1;
+						lastRedSeq = -1;
+						redUntil = 0;
 						// Opening a session is not an event: its already-finished history must not
 						// flash a green/red badge. Only a turn seen running here may settle.
 						sawRunning = false;
@@ -381,7 +412,7 @@ window.__ModuleLoader__.load({
 				}
 				// Always rescan: a turn that closed while the stream was silent (or while no
 				// subscription was in place yet) is only visible in the window itself.
-				turnEndKind = nextBinding === undefined ? undefined : readTurnEndKind(nextBinding.eventSource);
+				noteTurnEnd(nextBinding === undefined ? undefined : readTurnEnd(nextBinding.eventSource));
 				apply();
 			}
 
