@@ -1,7 +1,7 @@
 {
   "name": "dsh-tab-status-light",
-  "version": "1.0.0",
-  "description": "Shows the AI session state on the browser tab icon: gray pulsing while working, green when done, yellow while it waits for an answer, red when interrupted.",
+  "version": "1.1.0",
+  "description": "Show the AI session state on the browser tab icon — gray blinking while working, green when done, yellow while it waits for your answer, red when interrupted. 把 AI 狀態畫在分頁圖示上：進行中灰燈閃爍、完成綠、等你回答黃、中斷紅。",
   "license": "MIT",
   "author": "Kyle Fu",
   "keywords": [
