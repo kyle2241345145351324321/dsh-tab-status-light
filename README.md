@@ -33,6 +33,14 @@ plugin_manager({ action: "install_bundle", target: "dsh-tab-status-light" })
 plugin_manager({ action: "install_bundle", target: "/path/to/dsh-tab-status-light" })
 ```
 
+也可以直接用 npm 或 GitHub 上的版本：
+
+```sh
+dsh plugin --profile web add dsh-tab-status-light
+# 或
+dsh plugin --profile web add github:kyle2241345145351324321/dsh-tab-status-light
+```
+
 安裝後重新整理頁面（`Cmd+R`）即可看到分頁圖示變化。
 
 > 需要 harness 的 Web profile，且 `@deepseek-ai/dsh-client-ui-session` 與
