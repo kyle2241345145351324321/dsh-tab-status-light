@@ -45,6 +45,13 @@ window.__ModuleLoader__.load({
 		const SETTLE_MS = 10000;
 		/** Same for red: an interruption is louder news, so it stays on the tab longer. */
 		const SETTLE_MS_RED = 20000;
+		/**
+		 * Blink half that shows the bare mark. It is painted from a cached data URL
+		 * rather than restored to the shipped `href`: swapping back to the file URL
+		 * makes Chrome re-read the icon file, which lands a beat late and made the
+		 * blink look uneven.
+		 */
+		const PLAIN = "\u0000plain";
 		const SVG_CLOSE = "</svg>";
 		/**
 		 * Blink driver source. Chrome throttles page timers in hidden tabs (down to one
@@ -146,10 +153,10 @@ window.__ModuleLoader__.load({
 			 * @returns the icon URL.
 			 */
 			function hrefFor(frame, state) {
-				const key = frame.theme + "|" + state + "|" + (frame.art === null ? "plain" : "brand");
+				const key = frame.theme + "|" + (state === PLAIN ? "bare" : state) + "|" + (frame.art === null ? "plain" : "brand");
 				const cached = cache.get(key);
 				if (cached !== undefined) return cached;
-				const badge = badgeMarkup(state, RING[frame.theme]);
+				const badge = state === PLAIN ? "" : badgeMarkup(state, RING[frame.theme]);
 				const svg = frame.art === null
 					? '<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">' + badge + SVG_CLOSE
 					: frame.art + badge + SVG_CLOSE;
@@ -162,7 +169,9 @@ window.__ModuleLoader__.load({
 			function paint() {
 				if (disposed || frames === null) return;
 				for (const frame of frames) {
-					const href = wantedState === undefined ? frame.original : hrefFor(frame, wantedState);
+					const href = wantedState === undefined
+						? frame.original
+						: hrefFor(frame, wantedState === PLAIN ? PLAIN : wantedState);
 					if (href === null || frame.link.getAttribute("href") === href) continue;
 					frame.link.setAttribute("href", href);
 				}
@@ -297,7 +306,8 @@ window.__ModuleLoader__.load({
 					painter.set(state);
 					stopBlink = startTicker(BLINK_MS, () => {
 						lit = !lit;
-						painter.set(lit ? state : undefined);
+						// Both halves are cached data URLs, so every swap paints on the tick.
+						painter.set(lit ? state : PLAIN);
 					});
 					return;
 				}
