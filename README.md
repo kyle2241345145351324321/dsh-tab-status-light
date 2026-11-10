@@ -2,7 +2,9 @@
 
 **Put the AI session state on your browser tab icon** — a plugin for the [DeepSeek Harness](https://github.com/deepseek-ai) Web UI.
 
-[English](#english) · [繁體中文](#繁體中文)
+[English](#english) · [繁體中文](#繁體中文) · [![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/kyle2241345145351324321/dsh-tab-status-light)
+
+Listed on the community hub: **<https://dsh-plugin.org/plugins/kyle2241345145351324321/dsh-tab-status-light>**
 
 ![Tab icon states](preview.png)
 
